@@ -1,10 +1,89 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #090d15;
+  --color-ink-2: #0d1420;
+  --color-surface: #141b29;
+  --color-surface-2: #0f1521;
+  --color-line: #232d3f;
+  --color-line-strong: #33415a;
+  --color-fg: #e8edf5;
+  --color-fg-dim: #8a97ad;
+  --color-fg-faint: #5a6678;
+  --color-accent: #f5b94d;
+  --color-accent-strong: #ffca66;
+  --color-accent-ink: #1b1305;
+  --color-accent-text: #f5b94d;
+  --color-danger: #ff6b6b;
+
+  --font-ui: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --radius-card: 22px;
+  --radius-field: 16px;
+}
+
+:root {
+  --card-top: #161e2e;
+  --card-bottom: #121826;
+  --dialog-top: #161e2e;
+  --dialog-bottom: #10192a;
+  --field-focus-bg: #111826;
+  --pill-bg: #1a2333;
+  --pill-bg-hover: #202a3d;
+  --btn-disabled-bg: #1a2231;
+  --row-active: rgba(255, 255, 255, 0.05);
+  --overlay-hover: rgba(255, 255, 255, 0.06);
+  --glow: rgba(245, 185, 77, 0.16);
+  --card-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8);
+  --dialog-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --color-ink: #e8ecf3;
+  --color-ink-2: #f5f8fc;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f4f9;
+  --color-line: #e3e8f0;
+  --color-line-strong: #cdd6e3;
+  --color-fg: #131a27;
+  --color-fg-dim: #56637a;
+  --color-fg-faint: #8a97ab;
+  --color-accent: #f5b94d;
+  --color-accent-strong: #ffca66;
+  --color-accent-ink: #3a2905;
+  --color-accent-text: #a66611;
+  --color-danger: #d64545;
+
+  --card-top: #ffffff;
+  --card-bottom: #f7f9fc;
+  --dialog-top: #ffffff;
+  --dialog-bottom: #f6f8fc;
+  --field-focus-bg: #ffffff;
+  --pill-bg: #eef2f8;
+  --pill-bg-hover: #e5ebf4;
+  --btn-disabled-bg: #e6eaf1;
+  --row-active: rgba(19, 26, 39, 0.05);
+  --overlay-hover: rgba(19, 26, 39, 0.06);
+  --glow: rgba(245, 185, 77, 0.28);
+  --card-shadow: 0 24px 50px -28px rgba(30, 42, 66, 0.35);
+  --dialog-shadow: 0 30px 70px -30px rgba(30, 42, 66, 0.4);
+
+  color-scheme: light;
+}
+
 body {
-  margin: 0;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  min-width: 360px;
-  font-family: Arial, Helvetica, sans-serif;
+  @apply min-h-svh bg-ink font-ui text-fg antialiased;
+  transition: background 0.25s ease;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  @apply min-h-svh;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-text);
+  outline-offset: 2px;
 }

@@ -1,26 +1,46 @@
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 320px;
+@reference './index.css';
+
+.stage {
+  @apply relative flex min-h-svh items-center justify-center overflow-hidden px-5 py-8;
+  background: radial-gradient(
+    120% 90% at 50% -10%,
+    var(--color-ink-2),
+    var(--color-ink) 60%
+  );
 }
 
-form h5 {
-  margin: 0 0 8px;
-  font-size: 18px;
+
+.stage__glow {
+  @apply pointer-events-none absolute left-1/2 h-[640px] w-[640px] -translate-x-1/2;
+  top: -18%;
+  background: radial-gradient(circle, var(--glow), transparent 68%);
+  filter: blur(6px);
 }
 
-form label {
-  font-size: 14px;
+.stage__inner {
+  @apply relative w-full max-w-[440px];
 }
 
-form input {
-  padding: 8px;
-  font-size: 16px;
+.topbar {
+  @apply mb-3.5 flex items-center justify-between;
 }
 
-form button {
-  margin-top: 12px;
-  padding: 10px;
-  cursor: pointer;
+.eyebrow {
+  @apply m-0 pl-0.5 text-xs font-medium uppercase text-fg-faint;
+  letter-spacing: 0.32em;
+}
+
+.theme-toggle {
+  @apply grid h-[38px] w-[38px] cursor-pointer place-items-center rounded-[11px] border border-line bg-surface text-fg-dim;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.theme-toggle:hover {
+  @apply border-accent text-accent-text;
+}
+
+.stage__note {
+  @apply mx-0.5 mt-[18px] text-fg-faint;
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
 }

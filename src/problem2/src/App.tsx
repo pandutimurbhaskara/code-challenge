@@ -1,35 +1,25 @@
-import { useState, type FormEvent } from 'react'
+import { SwapCard } from './components/SwapCard'
+import { ThemeToggle } from './components/ThemeToggle'
+import { useTheme } from './hooks/useTheme'
 import './App.css'
 
 function App() {
-  const [amountToSend, setAmountToSend] = useState('')
-  const [amountToReceive, setAmountToReceive] = useState('')
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    // Swap logic goes here.
-  }
+  const { theme, toggle } = useTheme()
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h5>Swap</h5>
-
-      <label htmlFor="input-amount">Amount to send</label>
-      <input
-        id="input-amount"
-        value={amountToSend}
-        onChange={(e) => setAmountToSend(e.target.value)}
-      />
-
-      <label htmlFor="output-amount">Amount to receive</label>
-      <input
-        id="output-amount"
-        value={amountToReceive}
-        onChange={(e) => setAmountToReceive(e.target.value)}
-      />
-
-      <button type="submit">CONFIRM SWAP</button>
-    </form>
+    <main className="stage">
+      <div className="stage__glow" aria-hidden="true" />
+      <div className="stage__inner">
+        <div className="topbar">
+          <p className="eyebrow">Exchange desk</p>
+          <ThemeToggle theme={theme} onToggle={toggle} />
+        </div>
+        <SwapCard />
+        <footer className="stage__note">
+          Rates from the live price feed - balances are simulated see mockBalance function in src/problem2/src/lib/tokens.ts
+        </footer>
+      </div>
+    </main>
   )
 }
 
