@@ -4,7 +4,29 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fancy Form</title>
+    <meta name="color-scheme" content="dark light" />
+    <meta name="description" content="Swap one crypto asset for another at live exchange rates." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>Currency Swap</title>
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      (function () {
+        var t = 'dark';
+        try {
+          var q = new URLSearchParams(location.search).get('theme');
+          t = q === 'light' || q === 'dark' ? q : localStorage.getItem('theme');
+          t = t === 'light' ? 'light' : 'dark';
+        } catch (e) {
+          t = 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
