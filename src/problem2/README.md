@@ -10,8 +10,10 @@ npm install
 npm run dev      # dev server + HMR (http://localhost:5173)
 npm run build    # type-check (tsc -b) + production build
 npm run preview  # preview the production build
-npm run lint     # oxlint
-npm test         # jest (unit + component/page tests)
+npm run lint      # oxlint
+npm run typecheck # tsc -b (no emit)
+npm test          # jest (unit + component/page tests)
+npm run test:e2e  # playwright (local screenshots, see below)
 ```
 
 ## What it does
@@ -81,6 +83,27 @@ code they cover:
   Library: the token picker (search, keyboard nav, close behaviours), icon
   fallback, and the swap flow itself (conversion, rate flip, insufficient
   balance, and a submit that debits the balance after the mock delay).
+
+## CI
+
+`.github/workflows/ci.yml` runs on every push to `main` and on pull requests. It
+installs from the lockfile (`npm ci`) and runs `lint`, `typecheck`, and `test`
+against `src/problem2`. The end-to-end run below is deliberately **not** part of
+CI (it needs a browser download and a live server).
+
+## End-to-end / screenshots
+
+`npm run test:e2e` drives the built app in a real browser (Playwright) and writes
+screenshots of the swap flow to `e2e/screenshots/`. First time only, install the
+browser:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+Playwright starts the dev server itself and mocks the price feed, so the run is
+offline-safe and deterministic. Screenshots and reports are git-ignored.
 
 ## Styling
 
