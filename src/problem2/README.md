@@ -11,6 +11,7 @@ npm run dev      # dev server + HMR (http://localhost:5173)
 npm run build    # type-check (tsc -b) + production build
 npm run preview  # preview the production build
 npm run lint     # oxlint
+npm test         # jest (unit + component/page tests)
 ```
 
 ## What it does
@@ -67,6 +68,19 @@ src/
 │  └─ TokenIcon.tsx             # remote SVG with monogram fallback
 └─ data/prices.json             # bundled fallback snapshot
 ```
+
+## Tests
+
+Run with `npm test` (Jest + ts-jest; `jsdom` for the UI). Tests sit next to the
+code they cover:
+
+- `src/lib/*.test.ts` — the pure logic: amount parsing/formatting, icon URL and
+  mock-balance derivation, and `buildTokens`/`loadTokens` (dedupe, sort, and the
+  offline fallback with a mocked `fetch`).
+- `src/components/*.test.tsx` and `src/App.test.tsx` — the UI, via React Testing
+  Library: the token picker (search, keyboard nav, close behaviours), icon
+  fallback, and the swap flow itself (conversion, rate flip, insufficient
+  balance, and a submit that debits the balance after the mock delay).
 
 ## Styling
 
