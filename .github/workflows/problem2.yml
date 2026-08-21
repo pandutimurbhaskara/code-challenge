@@ -1,0 +1,39 @@
+name: problem2 CI
+
+# Only run when problem2's own files (or this workflow) change, so unrelated
+# problems don't kick off this pipeline.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/problem2/**'
+      - '.github/workflows/problem2.yml'
+  pull_request:
+    paths:
+      - 'src/problem2/**'
+      - '.github/workflows/problem2.yml'
+
+concurrency:
+  group: problem2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: lint, typecheck, test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/problem2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/problem2/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test -- --ci

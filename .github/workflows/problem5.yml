@@ -1,0 +1,39 @@
+name: problem5 CI
+
+# Only run when problem5's own files (or this workflow) change.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/problem5/**'
+      - '.github/workflows/problem5.yml'
+  pull_request:
+    paths:
+      - 'src/problem5/**'
+      - '.github/workflows/problem5.yml'
+
+concurrency:
+  group: problem5-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: typecheck, test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/problem5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/problem5/package-lock.json
+
+      # better-sqlite3 ships prebuilt binaries; ubuntu-latest also has the
+      # toolchain to compile from source if a prebuild is unavailable.
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test

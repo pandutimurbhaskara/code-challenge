@@ -22,6 +22,8 @@ It exposes the five required interface functions:
 - **Language:** TypeScript (strict mode), ESM
 - **Database:** SQLite through `better-sqlite3` (synchronous, zero-config, file-backed)
 - **Validation:** [`zod`](https://zod.dev) for request bodies, query params and path params
+- **API docs:** OpenAPI 3.0.3 served interactively via [`swagger-ui-express`](https://github.com/scottie1984/swagger-ui-express) at `/docs`
+- **Testing:** [`vitest`](https://vitest.dev) + [`supertest`](https://github.com/ladjs/supertest) (unit + HTTP integration)
 - **Dev runner:** [`tsx`](https://github.com/privatenumber/tsx) (run TS directly, watch mode)
 
 ---
@@ -34,13 +36,22 @@ src/problem5/
 ├── tsconfig.json
 ├── env.example              # copy to .env
 ├── README.md
+├── vitest.config.ts         # test runner config (in-memory DB)
+├── tests/                   # unit + HTTP integration tests
+│   ├── setup.ts             # pins DATABASE_PATH=:memory: before imports
+│   ├── helpers.ts           # migrate / reset the test DB
+│   ├── items.schema.test.ts     # zod validation (pure unit)
+│   ├── items.repository.test.ts # SQL data access (in-memory DB)
+│   └── items.api.test.ts        # full request lifecycle (supertest)
 └── src/
     ├── server.ts            # entry point: migrate() + listen()
-    ├── app.ts               # Express app factory (routes, middleware)
+    ├── app.ts               # Express app factory (routes, middleware, /docs)
     ├── config.ts            # typed env configuration
     ├── db/
     │   ├── index.ts         # SQLite connection + schema migration
     │   └── seed.ts          # optional sample data (`npm run seed`)
+    ├── docs/
+    │   └── openapi.ts       # OpenAPI 3.0.3 document (served at /docs)
     ├── items/
     │   ├── items.routes.ts       # route table
     │   ├── items.controller.ts   # request/response handling
@@ -121,6 +132,73 @@ This wipes the `items` table and inserts a handful of sample rows.
 | `npm start`        | Run the compiled server (`dist/server.js`).   |
 | `npm run typecheck`| Type-check without emitting.                  |
 | `npm run seed`     | Reset + insert sample data.                   |
+| `npm test`         | Run the unit + integration test suite once.   |
+| `npm run test:watch`| Re-run tests on change (watch mode).         |
+| `npm run test:coverage`| Run tests and print a coverage report.    |
+
+---
+
+## API documentation (Swagger / OpenAPI)
+
+The API is described by an **OpenAPI 3.0.3** document (`src/docs/openapi.ts`) that
+mirrors the zod schemas — every endpoint, request/response payload type, and
+example lives there.
+
+Once the server is running:
+
+- **Interactive docs (Swagger UI):** <http://localhost:3000/docs> — browse every
+  endpoint, see the payload types and examples, and **"Try it out"** to fire real
+  requests against the running server.
+- **Raw spec:** <http://localhost:3000/openapi.json> — import into Postman,
+  Insomnia, or a client generator.
+
+### Example payloads
+
+**`POST /api/items` — create** (`name` + `price` required; `currency` defaults to `USD`):
+
+```jsonc
+// full
+{ "name": "Espresso", "description": "Single shot", "category": "beverage", "price": 2.5, "currency": "usd" }
+// minimal
+{ "name": "Blueberry Muffin", "price": 2.95 }
+```
+
+**`PATCH /api/items/:id` — partial update** (send only what changes; `null` clears):
+
+```jsonc
+{ "price": 13.5 }          // change the price
+{ "category": null }       // clear the category
+```
+
+| Field         | Type             | Required           | Notes                                  |
+|---------------|------------------|--------------------|----------------------------------------|
+| `name`        | string           | yes (create/PUT)   | 1–200 chars, trimmed.                  |
+| `description` | string \| null   | no                 | ≤ 2000 chars. `null` clears it (PATCH). |
+| `category`    | string \| null   | no                 | ≤ 100 chars. `null` clears it (PATCH).  |
+| `price`       | number           | yes (create/PUT)   | ≥ 0, decimal.                          |
+| `currency`    | string           | no (default `USD`) | 3-letter ISO code, upper-cased.        |
+
+---
+
+## Testing
+
+Tests run on **Vitest** with **Supertest** for HTTP, against an **in-memory
+SQLite database** (`tests/setup.ts` pins `DATABASE_PATH=:memory:` before any app
+module loads), so the suite is hermetic — it never touches `./data/items.db` and
+needs no teardown.
+
+```bash
+npm test              # run once
+npm run test:coverage # with coverage report
+```
+
+Three layers are covered:
+
+| File                            | Layer            | What it checks                                                        |
+|---------------------------------|------------------|-----------------------------------------------------------------------|
+| `items.schema.test.ts`          | Validation (unit)| zod rules: required fields, bounds, defaults, currency casing, coercion. |
+| `items.repository.test.ts`      | Data access      | SQL for CRUD, cents↔decimal conversion, filtering, sorting, pagination. |
+| `items.api.test.ts`             | HTTP (integration)| Full request lifecycle: status codes, envelopes, validation & 404s.  |
 
 ---
 
@@ -152,10 +230,12 @@ Base URL: `http://localhost:<PORT>`
 All responses are JSON. Successful responses use a `{ "data": ... }` envelope;
 errors use `{ "error": { "message", "details?" } }`.
 
-### Health & index
+### Health, docs & index
 
 - `GET /health` → `{ "status": "ok" }`
 - `GET /` → self-describing list of endpoints
+- `GET /docs` → interactive Swagger UI
+- `GET /openapi.json` → raw OpenAPI 3.0.3 spec
 
 ### 1. Create — `POST /api/items`
 
