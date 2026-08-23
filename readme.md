@@ -22,24 +22,31 @@ We're cool as long as we can view your solution without any pain.
 
 ## CI/CD ##
 
-There are two GitHub Actions workflows under `.github/workflows/`, one per testable
-problem. Each only fires when its own files change — fixing something in problem5
-won't drag problem2 through its suite again. Pushing twice in a row also cancels any
-run still in flight for the older commit instead of queueing it.
+GitHub Actions runs one pipeline per solvable frontend/backend problem. Each workflow
+lives in `.github/workflows/` and only touches its own problem's directory.
 
 ### [problem2.yml](./.github/workflows/problem2.yml) — swap form
 
-Watches `src/problem2/**` plus the workflow itself. On Node 22 it does a clean
-`npm ci` (npm cache is keyed to the lockfile, so installs stay fast), then checks the
-code three ways: ESLint, `tsc --noEmit`, and the Vitest suite with `-- --ci` so nothing
-tries to open a watch mode inside the runner.
+Triggers on pushes and PRs that change `src/problem2/**` or the workflow itself, so
+edits to other problems never wake it up. A concurrency group keyed on the branch
+cancels superseded runs when new commits land.
+
+The single job checks out the code, sets up Node 22 with the npm cache pinned to
+`src/problem2/package-lock.json`, then runs three gates in order:
+
+1. `npm ci` — clean install from the lockfile.
+2. `npm run lint` and `npm run typecheck` — style rules and strict TypeScript.
+3. `npm test -- --ci` — Vitest suite in CI mode (no watch, fail on unhandled errors).
 
 ### [problem5.yml](./.github/workflows/problem5.yml) — Items Price API
 
-Same setup — path filter, Node 22, cached `npm ci` — minus the lint step; strict
-typecheck covers what matters for an API this small. The interesting bit is SQLite:
-`better-sqlite3` normally needs node-gyp, but prebuilt binaries exist for ubuntu-latest,
-and worst case the runner has the toolchain to compile it anyway. The tests themselves
-boot Express against an in-memory database and hit every route via supertest, so a green
-build means the endpoints genuinely respond, not just that the types agree.
+Same shape as problem2: path-filtered trigger, branch-keyed concurrency, Node 22,
+cached install from `src/problem5/package-lock.json`. Two differences:
 
+1. No lint step — the API relies on `tsc --noEmit` via `npm run typecheck`.
+2. A comment notes why SQLite is safe here: `better-sqlite3` ships prebuilt binaries
+   for ubuntu-latest, and the runner has the toolchain to compile from source if a
+   prebuild is missing.
+
+Tests run through `npm test`, which boots Express with an in-memory database and
+exercises every route end-to-end via supertest.
